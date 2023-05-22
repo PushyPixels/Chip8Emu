@@ -12,8 +12,8 @@ class Chip8Emu
 public:
 	int debugFlag = 1;
 	int cyclesPerUpdate = 1;
-	bool cycleUntilDraw = 1;
-	int cyclesPerDelayTime = 10;
+	bool cycleUntilDraw = 1; // currently unimplemented
+	int cyclesPerTimerDecrement = 10;
 	bool gfx[64 * 32];
 	char key[16]; // Keypad input state
 	unsigned char memory[4096];
@@ -105,7 +105,7 @@ public:
 			{
 				//std::cout << (int)delay_timer << std::endl;
 
-				if (currentCycle % cyclesPerDelayTime == 0)
+				if (currentCycle % cyclesPerTimerDecrement == 0)
 				{
 					delay_timer--;
 				}
@@ -116,7 +116,12 @@ public:
 				//{
 				//	audioSource.Play();
 				//}
-				sound_timer--;
+
+				if (currentCycle % cyclesPerTimerDecrement == 0)
+				{
+					sound_timer--;
+				}
+
 				if (sound_timer == 0) // Play sound when crossing to 0 (This may be wrong, check here: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.5)
 				{
 					//	audioSource.Stop();
