@@ -587,7 +587,7 @@ public:
 
 	void LoadGame()
 	{
-		std::ifstream rf("chip8notepad.ch8", std::ios::binary);
+		std::ifstream rf("Invaders.ch8", std::ios::binary);
 
 		char c;
 		int i = 0;
