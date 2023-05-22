@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <fstream>
 
+char* filename;
+
 class Chip8Emu
 {
 public:
@@ -556,6 +558,8 @@ private:
 	Chip8Emu emu;
 
 public:
+
+
 	bool OnUserCreate() override
 	{
 		// Called once at the start, so create things here
@@ -592,11 +596,25 @@ public:
 
 	void LoadGame()
 	{
-		std::ifstream rf("Invaders.ch8", std::ios::binary);
+		std::ifstream romfile;
+		if (filename)
+		{
+			romfile.open(filename, std::ios::binary);
+			if (!romfile)
+			{
+				std::cout << "Failed to open the file, falling back to Invaders.ch8" << std::endl;
+				romfile.open("Invaders.ch8", std::ios::binary);
+			}
+		}
+		else
+		{
+			std::cout << "No file provided, falling back to Invaders.ch8" << std::endl;
+			romfile.open("Invaders.ch8", std::ios::binary);
+		}
 
 		char c;
 		int i = 0;
-		while (rf.get(c))
+		while (romfile.get(c))
 		{
 			//std::cout << std::hex << (uint16_t)c << std::dec << std::endl;
 			emu.memory[i + 512] = c;
@@ -740,8 +758,18 @@ public:
 	}
 };
 
-int main()
+int main(int argc, char* argv[])
 {
+	if (argc < 2)
+	{
+		//std::cout << "No file provided." << std::endl;
+	}
+	else
+	{
+		filename = argv[1];
+		std::cout << "Loading: " << filename << std::endl;
+	}
+
 	Example demo;
 	if (demo.Construct(64, 32, 4, 4, false, false))
 		demo.Start();
