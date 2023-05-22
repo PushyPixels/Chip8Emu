@@ -10,6 +10,7 @@
 class Chip8Emu
 {
 public:
+	int debugFlag = 1;
 	int cyclesPerUpdate = 1;
 	bool cycleUntilDraw = 1;
 	int cyclesPerDelayTime = 10;
@@ -285,7 +286,7 @@ public:
 			break;
 
 			case 0x6: // 8XY6: Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
-				Log(opcode, "Bit shifted VX right by one. VX now contains least significant bit.");
+				Log(opcode, "Bit shifted VX right by one. VF now contains least significant bit.");
 				V[0xF] = (V[(opcode & 0x0F00) >> 8] & 0x1);
 				V[(opcode & 0x0F00) >> 8] = (V[(opcode & 0x0F00) >> 8] >> 1);
 				pc += 2;
@@ -310,7 +311,7 @@ public:
 			break;
 
 			case 0xE: // 8XYE: Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift. // TODO: Questionable VF logic?
-				Log(opcode, "Bit shifted VX right by one. VX now contains most significant bit.");
+				Log(opcode, "Bit shifted VX right by one. VF now contains most significant bit.");
 				V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x80;
 				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] << 1;
 				pc += 2;
@@ -352,9 +353,9 @@ public:
 			pc += 2;
 			break;
 
-		case 0xD000: // DXYN: Draw sprite at location XY on screen. Sprite is N lines high.
+		case 0xD000: // DXYN: Draw sprite at location VX,VY on screen. Sprite is N lines high.
 		{
-			Log(opcode, "Draw sprite at location XY on screen. Sprite is N lines high.");
+			Log(opcode, "Draw sprite at location VX,VY on screen. Sprite is N lines high.");
 			unsigned short x = V[(opcode & 0x0F00) >> 8];
 			unsigned short y = V[(opcode & 0x00F0) >> 4];
 			unsigned short height = opcode & 0x000F;
@@ -529,7 +530,7 @@ public:
 
 	void Log(unsigned int opcode, const char* string)
 	{
-		if (false)
+		if(debugFlag)
 		{
 			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << string << std::endl;
 		}
