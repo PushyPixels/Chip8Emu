@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
-#include <cstdint>
 
 class Chip8Emu
 {
@@ -16,7 +15,7 @@ public:
 	int cyclesPerDelayTime = 10;
 	bool gfx[64 * 32];
 	char key[16]; // Keypad input state
-	char memory[4096];
+	unsigned char memory[4096];
 	bool drawFlag;
 
 private:
@@ -128,10 +127,9 @@ public:
 	void Cycle()
 	{
 		// Fetch opcode
-		opcode = static_cast<unsigned int>((memory[pc] & 0xFF) << 8 | memory[pc + 1] & 0xFF); // No idea why I have to and with 0xFF; somehow was getting extra FF's at start of variable
-		//std::cout << std::hex << ((uint16_t)(memory[pc]) << 8) << std::dec << std::endl;
-		//std::cout << std::hex << (memory[pc + 1] % 255) << std::dec << std::endl;
+		opcode = static_cast<unsigned short>(memory[pc] << 8 | memory[pc + 1]);
 		//std::cout << "Current opcode: 0x" << std::hex << opcode << std::dec << std::endl;
+		
 		// Decode and execute opcode
 		Execute();
 	}
@@ -163,13 +161,13 @@ public:
 
 		case 0x1000: // 1NNN: Jump to NNN
 			Log(opcode, "Jump");
-			pc = static_cast<unsigned short>(opcode & 0x0FFF);
+			pc = opcode & 0x0FFF;
 			break;
 
 		case 0x2000: // 2NNN: Call subroutine at NNN
 			Log(opcode, "Call subroutine");
 			stack.push(pc);
-			pc = static_cast<unsigned short>(opcode & 0x0FFF);
+			pc = opcode & 0x0FFF;
 			break;
 
 		case 0x3000: // 3XNN: Skips the next instruction if VX equals NN.
@@ -219,7 +217,7 @@ public:
 
 		case 0x7000: // 7XNN: Adds NN to VX.
 			Log(opcode, "Added NN to VX");
-			V[(opcode & 0x0F00) >> 8] += static_cast<char>(opcode & 0x00FF);
+			V[(opcode & 0x0F00) >> 8] += static_cast<unsigned char>(opcode & 0x00FF);
 			pc += 2;
 			break;
 
@@ -288,8 +286,8 @@ public:
 
 			case 0x6: // 8XY6: Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
 				Log(opcode, "Bit shifted VX right by one. VX now contains least significant bit.");
-				V[0xF] = static_cast<char>(V[(opcode & 0x0F00) >> 8] & 0x1);
-				V[(opcode & 0x0F00) >> 8] = static_cast<char>(V[(opcode & 0x0F00) >> 8] >> 1);
+				V[0xF] = (V[(opcode & 0x0F00) >> 8] & 0x1);
+				V[(opcode & 0x0F00) >> 8] = (V[(opcode & 0x0F00) >> 8] >> 1);
 				pc += 2;
 				break;
 
@@ -306,15 +304,15 @@ public:
 					Log(opcode, "Set VX to VY minus VX. No borrow, VF will be set to 1.");
 					V[0xF] = 1;
 				}
-				V[(opcode & 0x0F00) >> 8] = static_cast<char>(V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8]);
+				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
 				pc += 2;
 			}
 			break;
 
 			case 0xE: // 8XYE: Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift. // TODO: Questionable VF logic?
 				Log(opcode, "Bit shifted VX right by one. VX now contains most significant bit.");
-				V[0xF] = static_cast<char>(V[(opcode & 0x0F00) >> 8] & 0x80);
-				V[(opcode & 0x0F00) >> 8] = static_cast<char>(V[(opcode & 0x0F00) >> 8] << 1);
+				V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x80;
+				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] << 1;
 				pc += 2;
 				break;
 
@@ -339,18 +337,18 @@ public:
 
 		case 0xA000: // ANNN: Sets I to the address NNN
 			Log(opcode, "Set I to the address NNN");
-			I = static_cast<unsigned short>(opcode & 0x0FFF);
+			I = opcode & 0x0FFF;
 			pc += 2;
 			break;
 
 		case 0xB000: // BNNN: Jumps to the address NNN plus V0.
 			Log(opcode, "Jump to the address NNN plus V0");
-			pc = static_cast<unsigned short>(V[0] + (opcode & 0x0FFF));
+			pc = V[0] + (opcode & 0x0FFF);
 			break;
 
 		case 0xC000: // CXNN: Sets VX to the result of a bitwise and operation on a random number and NN.
 			Log(opcode, "Set VX to the result of a bitwise and operation on a random number and NN.");
-			V[(opcode & 0x0F00) >> 8] = static_cast<char>((opcode & 0x00FF) & rand() % 255);
+			V[(opcode & 0x0F00) >> 8] = static_cast<unsigned char>((opcode & 0x00FF) & rand() % 255);
 			pc += 2;
 			break;
 
@@ -359,7 +357,7 @@ public:
 			Log(opcode, "Draw sprite at location XY on screen. Sprite is N lines high.");
 			unsigned short x = V[(opcode & 0x0F00) >> 8];
 			unsigned short y = V[(opcode & 0x00F0) >> 4];
-			unsigned short height = static_cast<unsigned short>(opcode & 0x000F);
+			unsigned short height = opcode & 0x000F;
 			unsigned short sourcePixel;
 
 			V[0xF] = 0;
@@ -443,11 +441,11 @@ public:
 
 			case 0x0A: // FX0A: A key press is awaited, and then stored in VX.  STOPS EXECUTION (not including timers).
 				Log(opcode, "Waiting for key press, will store in VX");
-				for (int i = 0; i < 16; i++)
+				for (unsigned char i = 0; i < 16; i++)
 				{
 					if (key[i] == 1)
 					{
-						V[(opcode & 0x0F00) >> 8] = static_cast<char>(i);
+						V[(opcode & 0x0F00) >> 8] = i;
 						pc += 2;
 						break;
 					}
@@ -493,9 +491,9 @@ public:
 				// of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.)
 			case 0x33:
 				Log(opcode, "Stored binary-coded decimal at I, I+1, and I+2");
-				memory[I] = static_cast<char>(V[(opcode & 0x0F00) >> 8] / 100);
-				memory[I + 1] = static_cast<char>(V[(opcode & 0x0F00) >> 8] / 10 % 10);
-				memory[I + 2] = static_cast<char>(V[(opcode & 0x0F00) >> 8] % 10);
+				memory[I] =		V[(opcode & 0x0F00) >> 8] / 100;
+				memory[I + 1] = V[(opcode & 0x0F00) >> 8] / 10 % 10;
+				memory[I + 2] = V[(opcode & 0x0F00) >> 8] % 10;
 				pc += 2;
 				break;
 
@@ -545,7 +543,7 @@ public:
 	Example()
 	{
 		// Name your application
-		sAppName = "Example";
+		sAppName = "Chip8Emu";
 	}
 
 private:
