@@ -12,6 +12,8 @@ class Chip8Emu
 {
 public:
 	int cyclesPerUpdate = 1;
+	bool cycleUntilDraw = 1;
+	int cyclesPerDelayTime = 10;
 	bool gfx[64 * 32];
 	char key[16]; // Keypad input state
 	char memory[4096];
@@ -26,6 +28,8 @@ private:
 
 	unsigned char delay_timer;
 	unsigned char sound_timer;
+
+	unsigned int currentCycle;
 
 	std::stack<unsigned short> stack; // may need to limit to 16 elements?
 
@@ -93,24 +97,30 @@ public:
 		{
 			// Run emulator cycle
 			Cycle();
-		}
 
-		// Update timers
-		if (delay_timer > 0)
-		{
-			std::cout << (int)delay_timer << std::endl;
-			delay_timer--;
-		}
-		if (sound_timer > 0)
-		{
-			//if (!audioSource.isPlaying)
-			//{
-			//	audioSource.Play();
-			//}
-			sound_timer--;
-			if (sound_timer == 0) // Play sound when crossing to 0 (This may be wrong, check here: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.5)
+			currentCycle++;
+
+			// Update timers
+			if (delay_timer > 0)
 			{
-			//	audioSource.Stop();
+				//std::cout << (int)delay_timer << std::endl;
+
+				if (currentCycle % cyclesPerDelayTime == 0)
+				{
+					delay_timer--;
+				}
+			}
+			if (sound_timer > 0)
+			{
+				//if (!audioSource.isPlaying)
+				//{
+				//	audioSource.Play();
+				//}
+				sound_timer--;
+				if (sound_timer == 0) // Play sound when crossing to 0 (This may be wrong, check here: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.5)
+				{
+					//	audioSource.Stop();
+				}
 			}
 		}
 	}
@@ -521,7 +531,10 @@ public:
 
 	void Log(unsigned int opcode, const char* string)
 	{
-		std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << string << std::endl;
+		if (false)
+		{
+			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << string << std::endl;
+		}
 	}
 };
 
@@ -726,7 +739,7 @@ public:
 int main()
 {
 	Example demo;
-	if (demo.Construct(64, 32, 4, 4))
+	if (demo.Construct(64, 32, 4, 4, false, false))
 		demo.Start();
 	return 0;
 }
