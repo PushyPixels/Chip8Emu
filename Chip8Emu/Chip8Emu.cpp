@@ -483,7 +483,7 @@ public:
 
 			case 0x29: // FX29: Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
 				Log(opcode, "Set I to the location of the sprite for the character in VX");
-				I = static_cast<unsigned short>(V[(opcode & 0x0F00) >> 8] * 10);
+				I = static_cast<unsigned short>(V[(opcode & 0x0F00) >> 8] * 5);
 				pc += 2;
 				break;
 
@@ -587,7 +587,7 @@ public:
 
 	void LoadGame()
 	{
-		std::ifstream rf("Invaders.ch8", std::ios::binary);
+		std::ifstream rf("chip8notepad.ch8", std::ios::binary);
 
 		char c;
 		int i = 0;
