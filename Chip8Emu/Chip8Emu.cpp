@@ -17,7 +17,7 @@ public:
 	bool cycleUntilDraw = 1; // currently unimplemented
 	int cyclesPerTimerDecrement = 10;
 	bool gfx[64 * 32];
-	char key[16]; // Keypad input state
+	bool key[16]; // Keypad input state
 	unsigned char memory[4096];
 	bool drawFlag;
 
@@ -105,7 +105,7 @@ public:
 			// Update timers
 			if (delay_timer > 0)
 			{
-				//std::cout << (int)delay_timer << std::endl;
+			    //std::cout << (int)delay_timer << std::endl;
 
 				if (currentCycle % cyclesPerTimerDecrement == 0)
 				{
