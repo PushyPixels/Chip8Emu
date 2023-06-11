@@ -144,6 +144,11 @@ public:
 
 	void Execute()
 	{
+		unsigned char X;
+		unsigned short NN;
+		unsigned short NNN;
+		std::ostringstream stringStream;
+
 		switch (opcode & 0xF000)
 		{
 		case 0x0000:
@@ -179,14 +184,18 @@ public:
 			break;
 
 		case 0x3000: // 3XNN: Skips the next instruction if VX equals NN.
-			if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+			X = (opcode & 0x0F00) >> 8;
+			NN = opcode & 0x00FF;
+			if (V[X] == NN)
 			{
-				Log(opcode, "Skipped next instruction (VX == NN)");
+				stringStream << "Skipped next instruction (V" << std::hex << X << " == " << NN << std::endl;
+				Log(opcode, stringStream);
 				pc += 4;
 			}
 			else
 			{
-				Log(opcode, "Continue to next instruction (VX != NN)");
+				stringStream << "Continue to next instruction (V" << std::hex << X << " != " << NN << std::endl;
+				Log(opcode, stringStream);
 				pc += 2;
 			}
 			break;
@@ -535,12 +544,21 @@ public:
 		}
 	}
 
-	void Log(unsigned int opcode, const char* string)
+	void Log(unsigned int opcode, std::string string)
 	{
 		if(debugFlag)
 		{
 			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << string << std::endl;
 		}
+	}
+
+	void Log(unsigned int opcode, std::ostringstream &stringStream)
+	{
+		if (debugFlag)
+		{
+			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << stringStream.str() << std::endl;
+		}
+		stringStream.str("");
 	}
 };
 
