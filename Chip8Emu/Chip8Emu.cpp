@@ -145,9 +145,12 @@ public:
 	void Execute()
 	{
 		unsigned char X;
+		unsigned char Y;
+		unsigned char N;
 		unsigned short NN;
 		unsigned short NNN;
 		std::ostringstream stringStream;
+		stringStream << std::hex << std::uppercase;
 
 		switch (opcode & 0xF000)
 		{
@@ -188,13 +191,13 @@ public:
 			NN = opcode & 0x00FF;
 			if (V[X] == NN)
 			{
-				stringStream << "Skipped next instruction (V" << std::hex << X << " == " << NN << std::endl;
+				stringStream << "Skipped next instruction (V" << static_cast<int>(X) << " == " << NN << ")";
 				Log(opcode, stringStream);
 				pc += 4;
 			}
 			else
 			{
-				stringStream << "Continue to next instruction (V" << std::hex << X << " != " << NN << std::endl;
+				stringStream << "Continue to next instruction (V" << static_cast<int>(X) << " != " << NN << ")";
 				Log(opcode, stringStream);
 				pc += 2;
 			}
@@ -371,14 +374,18 @@ public:
 
 		case 0xD000: // DXYN: Draw sprite at location VX,VY on screen. Sprite is N lines high.
 		{
-			Log(opcode, "Draw sprite at location VX,VY on screen. Sprite is N lines high.");
-			unsigned short x = V[(opcode & 0x0F00) >> 8];
-			unsigned short y = V[(opcode & 0x00F0) >> 4];
-			unsigned short height = opcode & 0x000F;
+			X = (opcode & 0x0F00) >> 8;
+			Y = (opcode & 0x00F0) >> 4;
+			N = opcode & 0x000F;
+			unsigned short x = V[X];
+			unsigned short y = V[Y];
 			unsigned short sourcePixel;
 
+			stringStream << "Draw sprite at location V" << static_cast<int>(X) << ", V" << static_cast<int>(Y) << " (" << std::dec << x << "," << y << std::hex << ") on screen. Sprite is " << static_cast<int>(N) << " lines high.";
+			Log(opcode, stringStream);
+
 			V[0xF] = 0;
-			for (int yline = 0; yline < height; yline++)
+			for (int yline = 0; yline < N; yline++)
 			{
 				sourcePixel = memory[I + yline];
 				for (int xline = 0; xline < 8; xline++)
