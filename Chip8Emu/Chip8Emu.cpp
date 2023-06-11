@@ -240,15 +240,18 @@ public:
 		case 0x6000: // 6XNN: Sets VX to NN.
 			X = (opcode & 0x0F00) >> 8;
 			NN = (opcode & 0x00FF);
-			stringStream << "Set V" << static_cast<int>(X) << " to " << NN << ")";
+			stringStream << "Set V" << static_cast<int>(X) << " to " << NN;
 			Log(opcode, stringStream);
 			V[X] = static_cast<unsigned char>(NN);
 			pc += 2;
 			break;
 
 		case 0x7000: // 7XNN: Adds NN to VX.
-			Log(opcode, "Added NN to VX");
-			V[(opcode & 0x0F00) >> 8] += static_cast<unsigned char>(opcode & 0x00FF);
+			X = (opcode & 0x0F00) >> 8;
+			NN = (opcode & 0x00FF);
+			stringStream << "Added " << NN << " to V" << static_cast<int>(X);
+			Log(opcode, stringStream);
+			V[X] += static_cast<unsigned char>(NN);
 			pc += 2;
 			break;
 
@@ -256,43 +259,59 @@ public:
 			switch (opcode & 0x000F)
 			{
 			case 0x0: // 8XY0: Sets VX to the value of VY.
-				Log(opcode, "Set VX to the value of VY");
-				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				stringStream << "Set V" << static_cast<int>(X) << " to the value of V" << static_cast<int>(Y);
+				Log(opcode, stringStream);
+				V[X] = V[Y];
 				pc += 2;
 				break;
 
 			case 0x1: // 8XY1: Sets VX to VX | VY.
-				Log(opcode, "Set VX to VX | VY");
-				V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				stringStream << "Set V" << static_cast<int>(X) << " to V" << static_cast<int>(X) << " | V" << static_cast<int>(Y);
+				Log(opcode, stringStream);
+				V[X] |= V[Y];
 				pc += 2;
 				break;
 
 			case 0x2: // 8XY2: Sets VX to VX & VY.
-				Log(opcode, "Set VX to VX & VY");
-				V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				stringStream << "Set V" << static_cast<int>(X) << " to V" << static_cast<int>(X) << " & V" << static_cast<int>(Y);
+				Log(opcode, stringStream);
+				V[X] &= V[Y];
 				pc += 2;
 				break;
 
 			case 0x3: // 8XY3: Sets VX to VX xor VY.
-				Log(opcode, "Set VX to VX xor VY");
-				V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				stringStream << "Set V" << static_cast<int>(X) << " to V" << static_cast<int>(X) << " xor V" << static_cast<int>(Y);
+				Log(opcode, stringStream);
+				V[X] ^= V[Y];
 				pc += 2;
 				break;
 
 			case 0x4: // 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
 			{
-				int temp = V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				int temp = V[X] + V[Y];
 				if (temp > 0xFF) // Carry if exeeds byte
 				{
-					Log(opcode, "Added VY to VX. Carry, VF will be set to 1");
+					stringStream << "Added V" << static_cast<int>(Y) << " to V" << static_cast<int>(X) << ". Carry, VF will be set to 1.";
+					Log(opcode, stringStream);
 					V[0xF] = 1;
 				}
 				else
 				{
-					Log(opcode, "Added VY to VX. No carry, VF will be set to 0");
+					stringStream << "Added V" << static_cast<int>(Y) << " to V" << static_cast<int>(X) << ". No carry, VF will be set to 0.";
+					Log(opcode, stringStream);
 					V[0xF] = 0;
 				}
-				V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+				V[X] += V[Y];
 				pc += 2;
 			}
 			break;
