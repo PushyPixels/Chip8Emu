@@ -375,9 +375,11 @@ public:
 			break;
 
 			case 0xE: // 8XYE: Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift. // TODO: Questionable VF logic?
-				Log(opcode, "Bit shifted VX right by one. VF now contains most significant bit.");
-				V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x80;
-				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] << 1;
+				X = (opcode & 0x0F00) >> 8;
+				stringStream << "Bit shifted V" << static_cast<int>(X) << " left by one. VF now contains most significant bit.";
+				Log(opcode, stringStream);
+				V[0xF] = V[X] & 0x80;
+				V[X] = V[X] << 1;
 				pc += 2;
 				break;
 
@@ -388,27 +390,35 @@ public:
 			break;
 
 		case 0x9000: // 9XY0: Skips the next instruction if VX doesn't equal VY.
-			if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
+			X = (opcode & 0x0F00) >> 8;
+			Y = (opcode & 0x00F0) >> 4;
+			if (V[X] != V[Y])
 			{
-				Log(opcode, "Skipped next instruction (VX != VY)");
+				stringStream << "Skipped next instruction (V" << static_cast<int>(X) << " != V" << static_cast<int>(Y) << ")";
+				Log(opcode, stringStream);
 				pc += 4;
 			}
 			else
 			{
-				Log(opcode, "Continue to next instruction (VX == VY)");
+				stringStream << "Continue to next instruction (V" << static_cast<int>(X) << " == V" << static_cast<int>(Y) << ")";
+				Log(opcode, stringStream);
 				pc += 2;
 			}
 			break;
 
 		case 0xA000: // ANNN: Sets I to the address NNN
-			Log(opcode, "Set I to the address NNN");
-			I = opcode & 0x0FFF;
+			NNN = opcode & 0x0FFF;
+			stringStream << "Set I to the address " << NNN;
+			Log(opcode, stringStream);
+			I = NNN;
 			pc += 2;
 			break;
 
 		case 0xB000: // BNNN: Jumps to the address NNN plus V0.
-			Log(opcode, "Jump to the address NNN plus V0");
-			pc = V[0] + (opcode & 0x0FFF);
+			NNN = opcode & 0x0FFF;
+			stringStream << "Jump to the address " << NNN << " plus V0";
+			Log(opcode, stringStream);
+			pc = V[0] + NNN;
 			break;
 
 		case 0xC000: // CXNN: Sets VX to the result of a bitwise and operation on a random number and NN.
