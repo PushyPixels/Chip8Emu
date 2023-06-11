@@ -4,6 +4,7 @@
 #include <array>
 #include <stack>
 #include <iostream>
+#include <iomanip>
 #include <stdlib.h>
 #include <fstream>
 
@@ -176,14 +177,18 @@ public:
 			break;
 
 		case 0x1000: // 1NNN: Jump to NNN
-			Log(opcode, "Jump");
-			pc = opcode & 0x0FFF;
+			NNN = opcode & 0x0FFF;
+			stringStream << "Jumped to " << NNN;
+			Log(opcode, stringStream);
+			pc = NNN;
 			break;
 
 		case 0x2000: // 2NNN: Call subroutine at NNN
-			Log(opcode, "Call subroutine");
+			NNN = opcode & 0x0FFF;
+			stringStream << "Called subroutine at " << NNN;
+			Log(opcode, stringStream);
 			stack.push(pc);
-			pc = opcode & 0x0FFF;
+			pc = NNN;
 			break;
 
 		case 0x3000: // 3XNN: Skips the next instruction if VX equals NN.
@@ -595,7 +600,7 @@ public:
 	{
 		if(debugFlag)
 		{
-			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << string << std::endl;
+			std::cout << "PC:" << std::hex << std::uppercase << std::setfill('0') << std::setw(3) << pc << " Op:" << std::setw(4) << opcode << std::dec << ": " << string << std::endl;
 		}
 	}
 
@@ -603,7 +608,7 @@ public:
 	{
 		if (debugFlag)
 		{
-			std::cout << "Opcode: 0x" << std::hex << opcode << std::dec << ": " << stringStream.str() << std::endl;
+			std::cout << "PC:" << std::hex << std::uppercase << std::setfill('0') << std::setw(3) << pc << " Op:" << std::setw(4) << opcode << std::dec << ": " << stringStream.str() << std::endl;
 		}
 		stringStream.str("");
 	}
