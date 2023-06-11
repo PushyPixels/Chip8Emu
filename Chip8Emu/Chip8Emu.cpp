@@ -318,43 +318,53 @@ public:
 
 			case 0x5: // 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 			{
-				int temp = V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				int temp = V[X] - V[Y];
 				if (temp < 0) // Don't carry if borrow in subtract
 				{
-					Log(opcode, "Subtracted VY from VX. Borrow, VF will be set to 0.");
+					stringStream << "Subtracted V" << static_cast<int>(Y) << " from V" << static_cast<int>(X) << ". Borrow, VF will be set to 0.";
+					Log(opcode, stringStream);
 					V[0xF] = 0;
 				}
 				else
 				{
-					Log(opcode, "Subtracted VY from VX. No borrow, VF will be set to 1.");
+					stringStream << "Subtracted V" << static_cast<int>(Y) << " from V" << static_cast<int>(X) << ". No borrow, VF will be set to 1.";
+					Log(opcode, stringStream);
 					V[0xF] = 1;
 				}
-				V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+				V[X] -= V[Y];
 				pc += 2;
 			}
 			break;
 
 			case 0x6: // 8XY6: Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
-				Log(opcode, "Bit shifted VX right by one. VF now contains least significant bit.");
-				V[0xF] = (V[(opcode & 0x0F00) >> 8] & 0x1);
-				V[(opcode & 0x0F00) >> 8] = (V[(opcode & 0x0F00) >> 8] >> 1);
+				X = (opcode & 0x0F00) >> 8;
+				stringStream << "Bit shifted V" << static_cast<int>(X) << " right by one. VF now contains least significant bit.";
+				Log(opcode, stringStream);
+				V[0xF] = (V[X] & 0x1);
+				V[X] = (V[X] >> 1);
 				pc += 2;
 				break;
 
 			case 0x7: // 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 			{
-				int temp = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
+				X = (opcode & 0x0F00) >> 8;
+				Y = (opcode & 0x00F0) >> 4;
+				int temp = V[Y] - V[X];
 				if (temp < 0) // Don't carry if borrow in subtract
 				{
-					Log(opcode, "Set VX to VY minus VX. Borrow, VF will be set to 0.");
+					stringStream << "Set V" << static_cast<int>(X) << " to V" << static_cast<int>(Y) << " minus V" << X << " Borrow, VF will be set to 0.";
+					Log(opcode, stringStream);
 					V[0xF] = 0;
 				}
 				else
 				{
-					Log(opcode, "Set VX to VY minus VX. No borrow, VF will be set to 1.");
+					stringStream << "Set V" << static_cast<int>(X) << " to V" << static_cast<int>(Y) << " minus V" << X << " No borrow, VF will be set to 1.";
+					Log(opcode, stringStream);
 					V[0xF] = 1;
 				}
-				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
+				V[X] = V[Y] - V[X];
 				pc += 2;
 			}
 			break;
