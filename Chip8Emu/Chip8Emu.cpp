@@ -204,34 +204,45 @@ public:
 			break;
 
 		case 0x4000: // 4XNN: Skips the next instruction if VX doesn't equal NN.
-			if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+			X = (opcode & 0x0F00) >> 8;
+			NN = opcode & 0x00FF;
+			if (V[X] != NN)
 			{
-				Log(opcode, "Skipped next instruction (VX != NN)");
+				stringStream << "Skipped next instruction (V" << static_cast<int>(X) << " != " << NN << ")";
+				Log(opcode, stringStream);
 				pc += 4;
 			}
 			else
 			{
-				Log(opcode, "Continue to next instruction (VX == NN)");
+				stringStream << "Continue to next instruction (V" << static_cast<int>(X) << " == " << NN << ")";
+				Log(opcode, stringStream);
 				pc += 2;
 			}
 			break;
 
 		case 0x5000: // 5XY0: Skips the next instruction if VX equals VY.
-			if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4])
+			X = (opcode & 0x0F00) >> 8;
+			Y = (opcode & 0x00F0) >> 4;
+			if (V[X] == V[Y])
 			{
-				Log(opcode, "Skipped next instruction (VX == VY)");
+				stringStream << "Skipped next instruction (V" << static_cast<int>(X) << " == V" << static_cast<int>(Y) << ")";
+				Log(opcode, stringStream);
 				pc += 4;
 			}
 			else
 			{
-				Log(opcode, "Continue to next instruction (VX != VY)");
+				stringStream << "Continue to next instruction (V" << static_cast<int>(X) << " != V" << static_cast<int>(Y) << ")";
+				Log(opcode, stringStream);
 				pc += 2;
 			}
 			break;
 
 		case 0x6000: // 6XNN: Sets VX to NN.
-			Log(opcode, "Set VX to NN");
-			V[(opcode & 0x0F00) >> 8] = static_cast<unsigned char>(opcode & 0x00FF);
+			X = (opcode & 0x0F00) >> 8;
+			NN = (opcode & 0x00FF);
+			stringStream << "Set V" << static_cast<int>(X) << " to " << NN << ")";
+			Log(opcode, stringStream);
+			V[X] = static_cast<unsigned char>(NN);
 			pc += 2;
 			break;
 
@@ -381,7 +392,7 @@ public:
 			unsigned short y = V[Y];
 			unsigned short sourcePixel;
 
-			stringStream << "Draw sprite at location V" << static_cast<int>(X) << ", V" << static_cast<int>(Y) << " (" << std::dec << x << "," << y << std::hex << ") on screen. Sprite is " << static_cast<int>(N) << " lines high.";
+			stringStream << "Draw sprite at location V" << static_cast<int>(X) << ",V" << static_cast<int>(Y) << " (" << std::dec << x << "," << y << std::hex << ") on screen. Sprite is " << static_cast<int>(N) << " lines high.";
 			Log(opcode, stringStream);
 
 			V[0xF] = 0;
