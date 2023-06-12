@@ -129,8 +129,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chip8Emu.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chip8Emu.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
   </ItemGroup>
   <ItemGroup>

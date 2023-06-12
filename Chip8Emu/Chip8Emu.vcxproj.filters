@@ -18,9 +18,15 @@
     <ClCompile Include="Chip8Emu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="olcPixelGameEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chip8Emu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
