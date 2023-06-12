@@ -72,7 +72,7 @@ public:
 		while (romfile.get(c))
 		{
 			//std::cout << std::hex << (uint16_t)c << std::dec << std::endl;
-			emu.memory[i + 512] = c;
+			emu.memory[i + 0x200] = c;
 			i++;
 		}
 	}
