@@ -5,7 +5,7 @@
 class Chip8Emu
 {
 public:
-	int debugFlag = 1;
+	int debugFlag = 0;
 	int cyclesPerUpdate = 1;
 	bool cycleUntilDraw = 1; // currently unimplemented
 	int cyclesPerTimerDecrement = 10;

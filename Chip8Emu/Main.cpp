@@ -31,6 +31,7 @@ public:
 
 		if (emu.drawFlag)
 		{
+//#pragma omp parallel for // Slower for some reason
 			for (int i = 0; i < 64 * 32; i++)
 			{
 				if (emu.gfx[i])
